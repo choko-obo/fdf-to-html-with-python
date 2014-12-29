@@ -1,0 +1,61 @@
+body {
+	font-family: 'Junge', serif;
+	font-size: 130%;
+	margin: 0;
+	padding: 0;
+	color: #000000;
+}
+#container {
+	width: 60%;
+	min-width: 200px;
+    max-width: 800px;
+	background: #ffffff;
+	margin: 0 auto;
+	padding: 12px;
+}
+#mainContent {
+	padding: 20px 50px 30px 50px;
+}
+
+
+p.businesszeile {
+	font-family: 'Droid Sans Mono';
+	font-size: 80%;
+}
+
+p.unterschrift {
+	font-family: 'Droid Sans Mono';
+	font-size: 80%;
+}
+
+
+img {
+	width: 100%;
+}
+
+a {	
+	color: #000000;
+	text-decoration: underline;
+}
+
+h1 {
+	font-family: 'Pathway Gothic One', sans-serif;
+	margin-top: 1.5em;
+	font-size: 200%;
+}
+h2 {
+	font-family: 'Pathway Gothic One', sans-serif;
+	margin-top: 1.5em;
+	font-size: 135%;
+}
+h3 {
+	font-family: 'Pathway Gothic One', sans-serif;
+	font-size: 110%;
+}
+h4 {
+	font-family: 'Pathway Gothic One', sans-serif;
+	font-size: 90%;
+}
+div {
+	display: block;
+}
