@@ -6,20 +6,20 @@ emptylnecnt=1
 newline='\r\n'
 p_closed=1
 
-path="moebel/testmoebel/text.it"
+path="moebel/testmoebel/"
 
 with open('static/head') as h:
     for line in h:
         print line
 
-with open(path) as f:
+with open(path + "text.it") as f:
     for line in f:
     	sline=line.replace(newline, '')
     	#Check what we have
     	#Is is a Image?
     	if line[0] == '|':
     		splitLine=sline.replace('|','').split(';')
-    		print '<p><img src="' + splitLine[0] + '" alt="' + splitLine[1] + '" width="300px"><br></p>'
+    		print '<p><img src="' + path + splitLine[0] + '" alt="' + splitLine[1] + '""><br></p>'
     	#Are those the footnotes
     	elif line[0] + line[1] == '--':
     		if btlcounter == 0:
