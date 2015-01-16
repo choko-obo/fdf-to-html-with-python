@@ -43,7 +43,7 @@ class Navigation:
     def get_html(self):
         self.html = '<div id="nav">\n'
         for page in self.nav_urls['order']:
-            self.html = '%s<a href="%s">%s</a>\n' % (self.html, self.nav_urls[page], page)
+            self.html = '%s<a href="%s">%s</a>\n' % (self.html, self.nav_urls[page], page.upper())
         self.html = self.html + '</div>'
         return self.html
 
@@ -54,7 +54,15 @@ class Page:
 
     def get_body(self):
         if self.page_name == 'möbel':
-            self.body=''
+            self.body='<h1>Möbel</h1>'
+            for möbel in c.möbels:
+                möbel = Möbel(möbel)
+                uri=möbel.get_uri()
+                möbel = möbel.get_preview_programmatically()
+                self.body='''%s<div class="moebel">
+                <a href="%s"><img src="%s" alt="%s" /></a><h2><span><a href="%s">%s</a></span></h2></a>
+                </div>
+                ''' % (self.body, uri, möbel['images'][0]['src'], möbel['images'][0]['alt'], uri, möbel['title'])
         else:
             self.body=rst_helpers.full(open(c.input + '/pages/' + self.page_name + '.rst').read(), '', self.page_name)
         return self.body
@@ -102,7 +110,7 @@ class Möbel:
         self.input_path=c.input + '/möbel/' + item_name + '/'
         self.output_path=c.output + '/möbel/' + item_name + '/'
         self.relative_path='/möbel/' + item_name + '/'
-        self.content=rst_helpers.full(open(self.input_path + 'text.rst').read(), self.output_path, self.item_name)
+        self.content=rst_helpers.full(open(self.input_path + 'text.rst').read(), self.relative_path, self.item_name)
         self.uri='%s%s/%s%s.html' % (c.http_shema, c.domain, self.relative_path, self.item_name)
 
     def get_content(self):
@@ -115,8 +123,10 @@ class Möbel:
 
     def write_content_standalone(self):
         page_so=Page(self.item_name)
+        nav=Navigation()
         with open(self.output_path + self.item_name + '.html', 'w') as f:
             f.write(page_so.get_head())
+            f.write(nav.get_html())
             f.write(rst_helpers.full(open(self.input_path + 'text.rst').read(), '', self.item_name))
             f.write(page_so.get_tail())
         f.close
@@ -132,8 +142,9 @@ class Möbel:
         return self.preview_html
 
     def get_preview_programmatically(self):
-    #returns objects of format = {'title': 'Titel. z.B. Tisch Eiche', 'anchor': 'foldername hust hust', 'images': [{'alt': 'S', 'src': 'moebel/testmoebel/titel.jpg'}, {'alt': 'U', 'src': 'moebel/testmoebel/detail_fach.jpg'}]}
-
+        '''returns objects of format = {'title': 'Titel. z.B. Tisch Eiche', 
+        'anchor': 'foldername hust hust', 'images': [{'alt': 'S', 'src': 'moebel/testmoebel/titel.jpg'},
+        {'alt': 'U', 'src': 'moebel/testmoebel/detail_fach.jpg'}]}'''
         retval=[]
         for line in self.content.split('\n'):
             if re.search('(<img|<h1)', line):
