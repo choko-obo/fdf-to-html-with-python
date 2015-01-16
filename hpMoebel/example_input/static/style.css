@@ -1,3 +1,22 @@
+@font-face {
+  font-family: 'Droid Sans Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Droid Sans Mono'), local('DroidSansMono'), url('fonts/DroidSansMono.ttf');
+}
+@font-face {
+  font-family: 'Junge';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Junge'), local('Junge-Regular'), url('fonts/Junge-Regular.ttf');
+}
+@font-face {
+  font-family: 'Pathway Gothic One';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Pathway Gothic One'), local('PathwayGothicOne-Regular'), url('fonts/PathwayGothicOne-Regular.ttf');
+}
+
 body {
 	font-family: 'Junge', serif;
 	font-size: 130%;
