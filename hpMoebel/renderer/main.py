@@ -29,12 +29,13 @@ c=config.Config(args.input)
 #c == ['domain', 'http_shema', 'moebels', 'output_directory', 'pages']
 
 class Navigation:
-    def __init__(self):
+    def __init__(self, ignore=''):
         self.nav_urls = {}
         self.nav_urls['order'] = []
         for page in c.pages:
-            self.nav_urls[page]='/pages/' + page + '.html'
-            self.nav_urls['order'].append(page)
+            if page != ignore:
+                self.nav_urls[page]='/pages/' + page + '.html'
+                self.nav_urls['order'].append(page)
 
     def add(self, another_pagename, another_url):
         self.nav_urls[another_pagename]=another_url
@@ -73,8 +74,8 @@ class Page:
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>%s</title>
-        <link rel="stylesheet" type="text/css" href="static/style.css">
-        <script type="text/javascript" src="static/live.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/style.css">
+        <script type="text/javascript" src="/static/live.js"></script>
     </head>
 
     <body>
@@ -89,10 +90,8 @@ class Page:
         return self.tail
 
     def get_all(self):
-        nav=Navigation()
         self.all=self.get_head()
-        self.all=self.all + nav.get_html()
-        self.all=self.all + self.get_body()
+        self.all=self.all + self.get_body().replace('</h1>', '</h1>' + Navigation(self.page_name).get_html())
         self.all=self.all + self.get_tail()
         return self.all
 
@@ -121,16 +120,41 @@ class Möbel:
             f.write(self.content) 
         f.close
 
+    def generate_infoblock(self,matchobj):
+        preis = matchobj.group(1)
+        design = matchobj.group(2)
+        ausführung = matchobj.group(3)
+        material = matchobj.group(4)
+
+        if re.search('Verkauft', preis):
+            preis = '<del>' + preis.replace(' Verkauft', '') + '</del> Verkauft'
+
+        retval='''
+        <div id="infoblock">
+        <p>
+        Preis: %s<br />
+        Design: %s<br />
+        Ausführung: %s<br />
+        Material: %s<br />
+        </p>
+        </div>''' % (preis,design,ausführung,material)
+
+        return retval
+ 
+
     def write_content_standalone(self):
         page_so=Page(self.item_name)
-        nav=Navigation()
         with open(self.output_path + self.item_name + '.html', 'w') as f:
             f.write(page_so.get_head())
-            f.write(nav.get_html())
-            f.write(rst_helpers.full(open(self.input_path + 'text.rst').read(), '', self.item_name))
+            content_as_html=rst_helpers.full(open(self.input_path + 'text.rst').read(), '', self.item_name, isEinrichtung=True)
+            #add navigation
+            content_as_html=content_as_html.replace('</h1>', '</h1>' + Navigation('').get_html())
+            #(Preis: Verkauft: Design: Ausführung: Material: )
+            content_as_html=re.sub('<p>Info:\nPreis:(.+)\nDesign:(.+)\nAusführung:(.+)\nMaterial:(.+)</p>',self.generate_infoblock,content_as_html)
+            f.write(content_as_html)
             f.write(page_so.get_tail())
         f.close
-        os.symlink('../../static', self.output_path + '/static')
+        #os.symlink('../../static', self.output_path + '/static')
 
     def get_preview_html(self):
         self.preview_html=''

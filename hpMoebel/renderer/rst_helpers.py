@@ -1,6 +1,8 @@
 from docutils.utils import new_document
 from docutils.writers import html4css1
 from docutils.core import publish_parts
+import re
+
 DEBUG = False
 #DEBUG = True
 
@@ -21,44 +23,7 @@ class CleanHTMLWriter(html4css1.Writer):
         html4css1.Writer.__init__(self)
         self.translator_class = CleanHTMLTranslator
 
-'''
-['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__gt__', 
-'__hash__', '__init__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', 
-'__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'add_meta', 'astext', 'attribution_formats', 
-'attval', 'check_simple_list', 'cloak_email', 'cloak_mailto', 'content_type', 'content_type_mathml', 'depart_Text', 
-'depart_abbreviation', 'depart_acronym', 'depart_address', 'depart_admonition', 'depart_attribution', 'depart_author', 
-'depart_authors', 'depart_block_quote', 'depart_bullet_list', 'depart_caption', 'depart_citation',
- 'depart_citation_reference', 'depart_classifier', 'depart_colspec', 'depart_compound', 'depart_contact', 'depart_container', 
- 'depart_copyright', 'depart_date', 'depart_decoration', 'depart_definition', 'depart_definition_list', 
- 'depart_definition_list_item', 'depart_description', 'depart_docinfo', 'depart_docinfo_item', 'depart_doctest_block', 
- 'depart_document', 'depart_emphasis', 'depart_entry', 'depart_enumerated_list', 'depart_field', 'depart_field_body',
-  'depart_field_list', 'depart_field_name', 'depart_figure', 'depart_footer', 'depart_footnote', 'depart_footnote_reference', 
-  'depart_generated', 'depart_header', 'depart_image', 'depart_inline', 'depart_label', 'depart_legend', 'depart_line', 
-  'depart_line_block', 'depart_list_item', 'depart_literal', 'depart_literal_block', 'depart_math', 'depart_math_block', 
-  'depart_meta', 'depart_option', 'depart_option_argument', 'depart_option_group', 'depart_option_list', 'depart_option_list_item', 
-  'depart_option_string', 'depart_organization', 'depart_paragraph', 'depart_problematic', 'depart_reference', 'depart_revision', 
-  'depart_row', 'depart_rubric', 'depart_section', 'depart_sidebar', 'depart_status', 'depart_strong', 'depart_subscript', 
-  'depart_subtitle', 'depart_superscript', 'depart_system_message', 'depart_table', 'depart_target', 'depart_tbody', 
-  'depart_term', 'depart_tgroup', 'depart_thead', 'depart_title', 'depart_title_reference', 'depart_topic', 'depart_transition', 
-  'depart_version', 'dispatch_departure', 'dispatch_visit', 'doctype', 'doctype_mathml', 'embedded_stylesheet', 'emptytag',
-  'encode', 'footnote_backrefs', 'generator', 'head_prefix_template', 'is_compactable', 'lang_attribute', 'mathjax_script', 
-  mathjax_url', 'optional', 'set_class_on_child', 'set_first_last', 'should_be_compact_paragraph', 'sollbruchstelle', 'starttag', 
-  'stylesheet_call', 'stylesheet_link', 'unimplemented_visit', 'unknown_departure', 'unknown_visit', 'visit_Text', 'visit_abbreviation', 
-  'visit_acronym', 'visit_address', 'visit_admonition', 'visit_attribution', 'visit_author', 'visit_authors', 'visit_block_quote', 
-  'visit_bullet_list', 'visit_caption', 'visit_citation', 'visit_citation_reference', 'visit_classifier', 'visit_colspec', 
-  'visit_comment', 'visit_compound', 'visit_contact', 'visit_container', 'visit_copyright', 'visit_date', 'visit_decoration',
-   'visit_definition', 'visit_definition_list', 'visit_definition_list_item', 'visit_description', 'visit_docinfo', 
-   'visit_docinfo_item', 'visit_doctest_block', 'visit_document', 'visit_emphasis', 'visit_entry', 'visit_enumerated_list',
-    'visit_field', 'visit_field_body', 'visit_field_list', 'visit_field_name', 'visit_figure', 'visit_footer', 'visit_footnote', 
-    'visit_footnote_reference', 'visit_generated', 'visit_header', 'visit_image', 'visit_inline', 'visit_label', 'visit_legend', 
-    'visit_line', 'visit_line_block', 'visit_list_item', 'visit_literal', 'visit_literal_block', 'visit_math', 'visit_math_block',
-     'visit_meta', 'visit_option', 'visit_option_argument', 'visit_option_group', 'visit_option_list', 'visit_option_list_item', 
-     'visit_option_string', 'visit_organization', 'visit_paragraph', 'visit_problematic', 'visit_raw', 'visit_reference', 
-     'visit_revision', 'visit_row', 'visit_rubric', 'visit_section', 'visit_sidebar', 'visit_status', 'visit_strong', 'visit_subscript', 
-     'visit_substitution_definition', 'visit_substitution_reference', 'visit_subtitle', 'visit_superscript', 'visit_system_message', 
-     'visit_table', 'visit_target', 'visit_tbody', 'visit_term', 'visit_tgroup', 'visit_thead', 'visit_title', 'visit_title_reference',
-      'visit_topic', 'visit_transition', 'visit_version', 'words_and_spaces', 'write_colspecs', 'xml_declaration']
-'''
+
 
 class CleanHTMLTranslator(html4css1.HTMLTranslator, object):
     """
@@ -171,11 +136,14 @@ class CleanHTMLTranslator(html4css1.HTMLTranslator, object):
 
     def visit_image(self, node):
         super(CleanHTMLTranslator, self).visit_image(node)
-        self.body[-1] = self.body[-1].replace(' />', ' src="%s" alt="%s"/>' % (path + node.attributes['uri'], node.attributes['alt']))
+        if isMoebel:
+            self.body[-1] = self.body[-1].replace(' />', ''' src="%s" alt="%s" /></a></div><a href="#_" class="lightbox" id="%s"><img src="%s"></a>''' % (path + node.attributes['uri'], node.attributes['alt'], re.sub('[\W_]+', '', node.attributes['uri']), path + node.attributes['uri']))
+            self.body[-1] = self.body[-1].replace('<img', '<div class="intext"><a href="#%s"><img' % re.sub('[\W_]+', '',node.attributes['uri']),1)
+        else:
+            self.body[-1] = self.body[-1].replace(' />', ' src="%s" alt="%s"/>' % (path + node.attributes['uri'], node.attributes['alt']))
 
 
-
-def full(content, static_path, static_name, enable_exit_status=None,**kwargs):
+def full(content, static_path, static_name, isEinrichtung=False, enable_exit_status=None,**kwargs):
     settings_overrides = {
         "input_encoding": "unicode",
         "doctitle_xform": False,
@@ -187,6 +155,8 @@ def full(content, static_path, static_name, enable_exit_status=None,**kwargs):
     path=static_path
     global item_name
     item_name=static_name
+    global isMoebel
+    isMoebel=isEinrichtung
     parts = publish_parts(
         source=content,
         writer=CleanHTMLWriter(),

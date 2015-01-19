@@ -10,6 +10,6 @@ class Config:
     #not shure if ill actually use this
     domain = 'moebel.facchin.at'
     #array of möbel in the sequence you want them to appear on index. name=directory name
-    möbels=['testmöbel', 'schuhregal']
+    möbels=['kartoffelregal', 'schuhregal', 'testmöbel']
     #array of pages in the sequence you want them to appear. name = file.rst in pages 
     pages=['möbel', 'kontakt', 'über']
