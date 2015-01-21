@@ -5,7 +5,6 @@ import shutil
 import importlib.machinery
 import sys
 import os
-import pyqrcode
 import qrcode
 import qrcode.image.svg
 
