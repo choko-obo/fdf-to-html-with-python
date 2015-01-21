@@ -136,6 +136,8 @@ class CleanHTMLTranslator(html4css1.HTMLTranslator, object):
 
     def visit_image(self, node):
         super(CleanHTMLTranslator, self).visit_image(node)
+        if not 'alt' in node.attributes:
+            node.attributes['alt']='Someone forgot to add Alt text'
         if isMoebel:
             self.body[-1] = self.body[-1].replace(' />', ''' src="%s" alt="%s" /></a></div><a href="#_" class="lightbox" id="%s"><img src="%s"></a>''' % (path + node.attributes['uri'], node.attributes['alt'], re.sub('[\W_]+', '', node.attributes['uri']), path + node.attributes['uri']))
             self.body[-1] = self.body[-1].replace('<img', '<div class="intext"><a href="#%s"><img' % re.sub('[\W_]+', '',node.attributes['uri']),1)

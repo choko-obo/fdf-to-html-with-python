@@ -4,8 +4,14 @@ import argparse
 import shutil
 import importlib.machinery
 import sys
-import glob
 import os
+import pyqrcode
+import qrcode
+import qrcode.image.svg
+
+
+
+
 #In general the translator class is tooo insane. and i lost patience.
 #will leave it at the "full" translator. will write my own postprocessor to add jumpmarks, anchors, qrcodes, and previews.
 #grrrr
@@ -27,6 +33,27 @@ config_loader = importlib.machinery.SourceFileLoader("Config", args.input + '/co
 config = config_loader.load_module()
 c=config.Config(args.input)
 #c == ['domain', 'http_shema', 'moebels', 'output_directory', 'pages']
+
+class TagCloud:
+    def __init__(self):
+        self.tc={}
+
+    def add_tag(self,key,value,page):
+        if not key in self.tc:
+            self.tc[key]={}
+        if not value in self.tc[key]:
+            self.tc[key][value]=[]
+        self.tc[key][value].append(page)
+
+
+    def get_tc(self):
+        return self.tc
+
+    def write_tc(self):
+        pass
+
+
+tc=TagCloud()
 
 class Navigation:
     def __init__(self, ignore=''):
@@ -64,6 +91,8 @@ class Page:
                 <a href="%s"><img src="%s" alt="%s" /></a><h2><span><a href="%s">%s</a></span></h2></a>
                 </div>
                 ''' % (self.body, uri, möbel['images'][0]['src'], möbel['images'][0]['alt'], uri, möbel['title'])
+        elif self.page_name == 'tags':
+            pass
         else:
             self.body=rst_helpers.full(open(c.input + '/pages/' + self.page_name + '.rst').read(), '', self.page_name)
         return self.body
@@ -75,7 +104,6 @@ class Page:
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>%s</title>
         <link rel="stylesheet" type="text/css" href="/static/style.css">
-        <script type="text/javascript" src="/static/live.js"></script>
     </head>
 
     <body>
@@ -110,7 +138,7 @@ class Möbel:
         self.output_path=c.output + '/möbel/' + item_name + '/'
         self.relative_path='/möbel/' + item_name + '/'
         self.content=rst_helpers.full(open(self.input_path + 'text.rst').read(), self.relative_path, self.item_name)
-        self.uri='%s%s/%s%s.html' % (c.http_shema, c.domain, self.relative_path, self.item_name)
+        self.uri='%s%s%s%s.html' % (c.http_shema, c.domain, self.relative_path, self.item_name)
 
     def get_content(self):
         return self.content
@@ -125,8 +153,11 @@ class Möbel:
         design = matchobj.group(2)
         ausführung = matchobj.group(3)
         material = matchobj.group(4)
+        tc.add_tag('design', design, self.item_name)
+        tc.add_tag('ausführung', ausführung, self.item_name)
+        tc.add_tag('material', material, self.item_name)
 
-        if re.search('Verkauft', preis):
+        if re.search('(V|v)erkauft', preis):
             preis = '<del>' + preis.replace(' Verkauft', '') + '</del> Verkauft'
 
         retval='''
@@ -144,6 +175,11 @@ class Möbel:
 
     def write_content_standalone(self):
         page_so=Page(self.item_name)
+
+        #Make&SaveQR
+        img = qrcode.make(self.uri, image_factory=qrcode.image.svg.SvgPathImage)
+        img.save(self.output_path + '/qr.svg')
+
         with open(self.output_path + self.item_name + '.html', 'w') as f:
             f.write(page_so.get_head())
             content_as_html=rst_helpers.full(open(self.input_path + 'text.rst').read(), '', self.item_name, isEinrichtung=True)
@@ -151,6 +187,7 @@ class Möbel:
             content_as_html=content_as_html.replace('</h1>', '</h1>' + Navigation('').get_html())
             #(Preis: Verkauft: Design: Ausführung: Material: )
             content_as_html=re.sub('<p>Info:\nPreis:(.+)\nDesign:(.+)\nAusführung:(.+)\nMaterial:(.+)</p>',self.generate_infoblock,content_as_html)
+            content_as_html=content_as_html + '<div><img id="qrkot" src="qr.svg" alt="A QR-Code pointing to %s" />' % self.uri
             f.write(content_as_html)
             f.write(page_so.get_tail())
         f.close
@@ -201,7 +238,6 @@ def create_output_dir():
 
 
 def create_pages():
-    os.symlink('../static', c.output + '/pages/static')
     for page in c.pages:
         page = Page(page)
         page.write_html()
@@ -216,3 +252,6 @@ def create_möbels():
 create_output_dir()
 create_pages()
 create_möbels()
+
+#create index.html
+shutil.copy(c.output + '/pages/möbel.html', c.output + '/index.html')
