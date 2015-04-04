@@ -3,6 +3,7 @@ pagename=example_input
 outFolder=www
 deployTarge=""
 ##### KOT ######
+cd ..
 
 function help()
 {

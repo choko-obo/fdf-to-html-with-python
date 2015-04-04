@@ -1,0 +1,111 @@
+##### CONFIG #######
+pagename=example_input
+outFolder=www
+deployTarge=""
+##### KOT ######
+cd ..
+
+function help()
+{
+	echo "verbs are: preview, deploy, save, load, install, clean"
+	echo "preview    preview the homepage locally"
+	echo "deploy     deploy homepage somewhere else i.e. make public"
+	echo "save       save the homepage to git"
+	echo "load       load latest commit from git"
+	echo "install    maybe install all prerequisites"
+	echo "clean      stop the preview server delete all generated files"
+	echo "logs:      tail -f accros err and acc log. ctrl+c to quit"
+}
+
+
+function preview()
+{
+	#render the preview
+	python3 ./renderer/main.py -p -i $pagename
+	#kill old server
+	sudo pkill -KILL lighttpd
+	#server start
+	touch preview.$outFolder/err.log
+	chmod 777 preview.$outFolder/err.log
+	cat lighttpd.conf | sed "s#REPLACEME-root#$PWD/preview.$outFolder#" > preview.$outFolder/preview.lighttpd.conf
+	sudo lighttpd -f preview.$outFolder/preview.lighttpd.conf
+}
+
+function logs()
+{
+tail -f $PWD/preview.$outFolder/err.log $PWD/preview.$outFolder/acc.log
+}
+
+function deploy()
+{
+        python3 ./renderer/main.py -p -i $pagename	
+	scp -r $outFolder/* $deployTarget
+}
+
+function clean()
+{
+        sudo pkill -KILL lighttpd
+	sudo rm -r $outFolder
+	sudo rm -r preview.$outFolder 
+}
+
+function save()
+{
+	cd $pagename
+	git add *
+	echo "Was wurde geaendert?"
+	read gitmsg
+	git commit -m $gitmsg
+	git push
+	cd ..
+}
+
+function load()
+{
+	cd $pagename
+	git pull
+	cd ..
+}
+
+function install()
+{
+echo "heh i didnt really implement any install magic"
+echo "but ill tell you about the requisites"
+echo "and give some hints on how to get them"
+echo ""
+echo "python3 docutils six lighthttpd"
+echo "Deb/Ubuntu: apt-get python3 six python-docutils lighttpd"
+echo "Archlinux:  pacman -S python3 six python-docutils lighttpd"
+
+echo "add a entry to your /etc/hosts file:"
+echo "cat 127.0.0.1 preview.$(cat $pagename/config.py | grep domain | cut -d "=" -f 2 | cut -d "'" -f 2)"
+}
+
+case $1 in
+	preview)
+		preview        	
+        ;;
+
+	deploy)
+		deploy
+	;;
+
+	save)
+		save
+	;;
+
+	load)
+		load
+	;;
+
+	install)
+		install
+	;;
+
+	logs)
+		logs
+	;;
+	*)
+		help
+	;;
+esac
