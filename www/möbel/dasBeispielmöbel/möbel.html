@@ -1,0 +1,22 @@
+<h1 id="dasBeispielmöbel">Das ist das Beispielmöbel.</h1>
+<h2>Hier erklärt es das text format</h2>
+<p>es handelt sich dabei um <a href="http://docutils.sourceforge.net/docs/user/rst/quickref.html">RestructuredText</a></p>
+<p><a href="http://docutils.sourceforge.net/docs/user/rst/quickref.html">RestructuredText</a> ist ein Format das versucht sowohl im browser als auch im Texeditor lesbar zu bleiben.</p>
+<p>Änderungen zu normalem RST:</p>
+<p>Die letzte überschrift, der obersten Ebene, wird auch zum Titel der Seite. Heisst in der praxis: man sollte h1 nur 1 mal am anfang verwenden.</p>
+<p>Das erste Bild wird in der Möbel übersicht verwendet.
+Es sollte Querformat sein.</p>
+<p>Es gibt einen besonderen Textblock:</p>
+<p>Info:
+Preis: 6.30€ Verkauft
+Design: Raoul Facchin
+Ausführung: Raoul Facchin
+Material: Kartoffeln und Sauce</p>
+<p>Bedingung für das funktionieren dieses Blocks sind die Wörter vor dem Doppelpunkt:</p>
+<p>Die preis zeile hat die eigrnschaft das der preis durchgestrichen dargestellt wird wenn das Wort Verkauft in der Zeile vorkommt</p>
+<img src="/möbel/dasBeispielmöbel/114.jpg" alt="Someone forgot to add Alt text"/>
+<p>Ein weiteres bild um auch die indirekte Referenz herzuzeigen <img src="/möbel/dasBeispielmöbel/lena_std.jpg" alt="lenna"/></p>
+<p>Zu beachten ist die fussnote am Ende des Texts</p>
+<p><strong>Wichtig auch:</strong> damit eine neue Seite ein neues möbel auch angezeigt werden muss sie in die config.py datei eingetragen werden. die findet sich im verzeichniss über möbel.</p>
+<p>Sie bestimmt einige parameter der seite. Unteranderem auch die reihenfolge der Möbel/Seiten in den menues.</p>
+<p>Wenn as alles erledigt ist kann man mit python3 renderer/main.py -i projektordner die homepage rendern.</p>

@@ -19,7 +19,8 @@ import qrcode.image.svg
 argument_parser = argparse.ArgumentParser(description="Renders a homepage from a very specific folder/file format")
 argument_parser.add_argument("-i", "--input", type=str, default="", help="the input directroy.")
 argument_parser.add_argument("-o", "--output", type=str, default="www", help='the output directory. defaults to "www"')
-argument_parser.add_argument("-d", "--debug", help="don't write just run everything else")
+argument_parser.add_argument("-d", "--debug", action='store_true', help="don't write just run everything else")
+argument_parser.add_argument("-p", "--preview", action='store_true', help="prepend preview. to the url and the output_directory")
 args = argument_parser.parse_args()
 
 if args.input == "" or args.debug:
@@ -32,6 +33,12 @@ config_loader = importlib.machinery.SourceFileLoader("Config", args.input + '/co
 config = config_loader.load_module()
 c=config.Config(args.input)
 #c == ['domain', 'http_shema', 'moebels', 'output_directory', 'pages']
+if args.output == "":
+    c.output=args.output
+
+if args.preview:
+    c.domain='%s%s' % ("preview.", c.domain)
+    c.output='%s%s' % ("preview.", c.output)
 
 class TagCloud:
     def __init__(self):
